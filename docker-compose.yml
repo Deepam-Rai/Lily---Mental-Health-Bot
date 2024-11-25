@@ -1,0 +1,36 @@
+services:
+  core-server:
+    image: lily:latest
+    build: .
+    container_name: lily-core
+    ports:
+      - "5005:5005"
+    volumes:
+      - ./:/app
+    environment:
+      - RASA_TELEMETRY_ENABLED=false
+    command: bash -c "rasa run --enable-api --cors \"*\" --debug --model models/lily.tar.gz --port \"5005\""
+    networks:
+      - all
+
+  action-server:
+    image: lily:latest
+    build: .
+    container_name: lily-actions
+    volumes:
+      - ./actions:/app/actions
+    environment:
+      - RASA_TELEMETRY_ENABLED=false
+    env_file:
+      - .env
+    command: bash -c "rasa run actions --port \"5055\" --debug"
+    ports:
+      - "5055:5055"
+    networks:
+      - all
+
+networks:
+  all:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "true"
